@@ -1,4 +1,3 @@
-# app/book_pdf_exporter.py
 from weasyprint import HTML
 from jinja2 import Template
 import os
@@ -11,28 +10,73 @@ def save_book_as_pdf(title: str, content: str, filename: str = "star_wars_book.p
         <meta charset="utf-8">
         <title>{{ title }}</title>
         <style>
+            @page {
+                margin: 50px 70px;
+                @bottom-center {
+                    content: counter(page);
+                    font-size: 12px;
+                    font-family: Georgia, serif;
+                }
+            }
+            @page:first {
+                @bottom-center {
+                    content: "";
+                }
+            }
+
             body {
                 font-family: Georgia, serif;
-                margin: 50px;
-                line-height: 1.6;
-            }
-            h1, h2 {
-                color: #333;
-                text-align: center;
-            }
-            h2 {
-                margin-top: 40px;
-            }
-            p {
-                margin: 10px 0;
+                line-height: 1.7;
+                margin: 0;
+                padding: 0;
                 text-align: justify;
+            }
+
+            .title-page {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                font-size: 36px;
+                font-weight: bold;
+                text-align: center;
+                page-break-after: always;
+            }
+
+            h1.chapter-heading {
+                font-size: 28px;
+                font-weight: bold;
+                text-align: center;
+                margin-top: 80px;
+                margin-bottom: 20px;
+                text-transform: uppercase;
+            }
+
+            h2.chapter-subtitle {
+                font-size: 18px;
+                font-weight: bold;
+                text-align: center;
+                margin-bottom: 40px;
+                color: #333;
+            }
+
+            p {
+                margin: 0;
+                margin-bottom: 14px;
+                text-align: justify;
+                text-indent: 2em;
+                widows: 2;
+                orphans: 2;
             }
         </style>
     </head>
     <body>
-        <h1>{{ title }}</h1>
+        <div class="title-page">{{ title }}</div>
+
         {% for section in sections %}
-            <h2>{{ section.heading }}</h2>
+            <h1 class="chapter-heading">Chapter {{ loop.index }}</h1>
+            <h2 class="chapter-subtitle">{{ section.heading }}</h2>
             {% for para in section.body %}
                 <p>{{ para }}</p>
             {% endfor %}
@@ -41,6 +85,7 @@ def save_book_as_pdf(title: str, content: str, filename: str = "star_wars_book.p
     </html>
     """)
 
+    # Parse content into sections
     sections = []
     if "## " in content:
         for sec in content.split("## "):
